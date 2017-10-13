@@ -40,6 +40,7 @@
     <ClInclude Include="Vertex.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="AshikhminMaterial.cpp" />
     <ClCompile Include="Bitmap.cpp" />
     <ClCompile Include="BoxTreeNode.cpp" />
     <ClCompile Include="BoxTreeObject.cpp" />

@@ -1,3 +1,7 @@
+/*
+Camera class that defines how the scene is viewed as well as antialiasing of the scene
+*/
+
 #pragma once
 #include "glm/glm.hpp"
 #include "Scene.h"
@@ -7,13 +11,18 @@ using namespace glm;
 
 class Camera {
 private:
+	//matrix defining how camera view scene
 	mat4x4 lookAtMatrix;
+	//resolution
 	int resWidth, resHeight;
 	float FOVY, FOVX;
 	float aspect;
+	//bmp instance which allows scene to be turned into .bmp pixel by pixel
 	Bitmap *bmp;
+	//number of samples for pixel jittering
 	int xSamples;
 	int ySamples;
+	//whether to apply certain antialiasing techniques
 	bool supersample;
 	bool jitter;
 	bool shirley;

@@ -3,6 +3,7 @@
 #include "iostream"
 #include "glm/ext.hpp"
 
+
 BoxTreeNode::BoxTreeNode() {
 	BoxMin = glm::vec3(100000.0, 100000.0, 100000.0);
 	BoxMax = glm::vec3(-100000.0, -100000.0, -100000.0);
@@ -17,150 +18,6 @@ BoxTreeNode::~BoxTreeNode() {
 	Child1 = NULL;
 	Child2 = NULL;
 }
-void BoxTreeNode::Construct(int count, Triangle **tri) {
-
-	//std::cout << count << std::endl;
-	//std::cout << "vertices in node : ";
-
-	for (unsigned int i = 0; i < count; i++) {
-
-		//std::cout << (*tri)[i].index << ", ";
-
-		/*double x = (*tri)[i].center[0];
-		double y = (*tri)[i].center[1];
-		double z = (*tri)[i].center[2];
-		if (x < BoxMin[0]) BoxMin[0] = x;
-		if (x > BoxMax[0]) BoxMax[0] = x;
-		if (y < BoxMin[1]) BoxMin[1] = y;
-		if (y > BoxMax[1]) BoxMax[1] = y;
-		if (z < BoxMin[2]) BoxMin[2] = z;
-		if (z > BoxMax[2]) BoxMax[2] = z;*/
-
-		//std::cout << glm::to_string((*tri)[i].GetVtx(0)->Position) << std::endl;
-
-		Vertex xm = *((*tri)[i].GetVtx(0));
-		Vertex ym = *((*tri)[i].GetVtx(1));
-		Vertex zm = *((*tri)[i].GetVtx(2));
-		double x = std::max(xm.Position[0], std::max(ym.Position[0], zm.Position[0]));
-		double y = std::max(xm.Position[1], std::max(ym.Position[1], zm.Position[1]));
-		double z = std::max(xm.Position[2], std::max(ym.Position[2], zm.Position[2]));
-		double xn = std::min(xm.Position[0], std::min(ym.Position[0], zm.Position[0]));
-		double yn = std::min(xm.Position[1], std::min(ym.Position[1], zm.Position[1]));
-		double zn = std::min(xm.Position[2], std::min(ym.Position[2], zm.Position[2]));
-
-		if (xn < BoxMin[0]) BoxMin[0] = xn;
-		if (x > BoxMax[0]) BoxMax[0] = x;
-		if (yn < BoxMin[1]) BoxMin[1] = yn;
-		if (y > BoxMax[1]) BoxMax[1] = y;
-		if (zn < BoxMin[2]) BoxMin[2] = zn;
-		if (z > BoxMax[2]) BoxMax[2] = z;
-
-	}
-	if (count <= MaxTrianglesPerBox) {
-		for (int i = 0; i < count; i++) {
-			Tri[i] = (*tri)[i];
-		}
-		numTris = count;
-		return;
-	}
-	double lengthX = BoxMax[0] - BoxMin[0];
-	double lengthY = BoxMax[1] - BoxMin[1];
-	double lengthZ = BoxMax[2] - BoxMin[2];
-	Triangle *tri1 = new Triangle[count]; 
-	Triangle *tri2 = new Triangle[count];
-	int count1 = 0, count2 = 0;
-	if (std::max(lengthX, std::max(lengthY, lengthZ)) == lengthX) {
-		double mid = (lengthX / 2.0) + BoxMin[0];
-		for (int i = 0; i < count; i++) {
-			glm::vec3 triCenter = (*tri)[i].center;
-			if (triCenter[0] >= mid) {
-				tri2[count2] = (*tri)[i];
-				count2 = count2 + 1;
-			}
-			else {
-				tri1[count1] = (*tri)[i];
-				count1 = count1 + 1;
-			}
-		}
-		if (count1 == 0) {
-			count2 = count2 - 1;
-			tri1[0] = tri2[count2];
-			count1 = 1;
-		}
-		else if (count2 == 0) {
-			count1 = count1 - 1;
-			tri2[0] = tri1[count1];
-			count2 = 1;
-		}
-		Child1 = new BoxTreeNode;
-		Child2 = new BoxTreeNode;
-		Child1->Construct(count1, &tri1);
-		Child2->Construct(count2, &tri2);
-		delete[]tri1;
-		delete[]tri2;
-	}
-	else if (std::max(lengthX, std::max(lengthY, lengthZ)) == lengthY) {
-		double mid = (lengthY / 2.0) + BoxMin[1];
-		for (int i = 0; i < count; i++) {
-			glm::vec3 triCenter = (*tri)[i].center;
-			if (triCenter[1] >= mid) {
-				tri2[count2] = (*tri)[i];
-				count2++;
-			}
-			else {
-				tri1[count1] = (*tri)[i];
-				count1++;
-			}
-		}
-		if (count1 == 0) {
-			count2 = count2 - 1;
-			tri1[count1] = tri2[count2];
-			count1 = count1 + 1;
-		}
-		else if (count2 == 0) {
-			count1 = count1 - 1;
-			tri2[count2] = tri1[count1];
-			count2 = count2 + 1;
-		}
-		Child1 = new BoxTreeNode;
-		Child2 = new BoxTreeNode;
-		Child1->Construct(count1, &tri1);
-		Child2->Construct(count2, &tri2);
-		delete[]tri1;
-		delete[]tri2;
-	}
-	else if (std::max(lengthX, std::max(lengthY, lengthZ)) == lengthZ) {
-		double mid = (lengthZ / 2.0) + BoxMin[2];
-		for (int i = 0; i < count; i++) {
-			glm::vec3 triCenter = (*tri)[i].center;
-			if (triCenter[2] >= mid) {
-				tri2[count2] = (*tri)[i];
-				count2++;
-			}
-			else {
-				tri1[count1] = (*tri)[i];
-				count1++;
-			}
-		}
-		if (count1 == 0) {
-			count2 = count2 - 1;
-			tri1[count1] = tri2[count2];
-			count1 = count1 + 1;
-		}
-		else if (count2 == 0) {
-			count1 = count1 - 1;
-			tri2[count2] = tri1[count1];
-			count2 = count2 + 1;
-		}
-		Child1 = new BoxTreeNode;
-		Child2 = new BoxTreeNode;
-		Child1->Construct(count1, &tri1);
-		Child2->Construct(count2, &tri2);
-		delete[]tri1;
-		delete[]tri2;
-	}
-}
-
 bool BoxTreeNode::Intersect(const Ray &ray, Intersection &hit) {
 	bool success = false;
 	if (Child1 == NULL) {
@@ -223,7 +80,7 @@ bool BoxTreeNode::Intersect(const Ray &ray, Intersection &hit) {
 			success = Child2->Intersect(ray, hit);
 		}
 		else {
-			bool trash = Child2->Intersect(ray, hit); 
+			bool trash = Child2->Intersect(ray, hit);
 		}
 		return success;
 	}
@@ -240,3 +97,156 @@ bool BoxTreeNode::Intersect(const Ray &ray, Intersection &hit) {
 	return false;
 }
 
+void BoxTreeNode::Construct(int count, std::vector<Triangle>& tri) {
+	if (count <= MaxTrianglesPerBox) {
+		for (int i = 0; i < count; i++) {
+			Tri[i] = (tri)[i];
+		}
+		numTris = count;
+
+		return;
+	}
+	ScaleBox(count, tri);
+	double lengthX = BoxMax[0] - BoxMin[0];
+	double lengthY = BoxMax[1] - BoxMin[1];
+	double lengthZ = BoxMax[2] - BoxMin[2];
+	//choosed how to divide current box into children based on longest axis
+	if (std::max(lengthX, std::max(lengthY, lengthZ)) == lengthX) {
+		DivideAlongX(count, lengthX, tri);
+	}
+	else if (std::max(lengthX, std::max(lengthY, lengthZ)) == lengthY) {
+		DivideAlongY(count, lengthY, tri);
+	}
+	else if (std::max(lengthX, std::max(lengthY, lengthZ)) == lengthZ) {
+		DivideAlongZ(count, lengthZ, tri);
+	}
+}
+
+void BoxTreeNode::ScaleBox(int count, std::vector<Triangle>& tri) {
+	for (unsigned int i = 0; i < count; i++) {
+		Vertex xm = *((tri)[i].GetVtx(0));
+		Vertex ym = *((tri)[i].GetVtx(1));
+		Vertex zm = *((tri)[i].GetVtx(2));
+		//finds max and min x,y,z among all triangles
+		double x = std::max(xm.Position[0], std::max(ym.Position[0], zm.Position[0]));
+		double y = std::max(xm.Position[1], std::max(ym.Position[1], zm.Position[1]));
+		double z = std::max(xm.Position[2], std::max(ym.Position[2], zm.Position[2]));
+		double xn = std::min(xm.Position[0], std::min(ym.Position[0], zm.Position[0]));
+		double yn = std::min(xm.Position[1], std::min(ym.Position[1], zm.Position[1]));
+		double zn = std::min(xm.Position[2], std::min(ym.Position[2], zm.Position[2]));
+		//assignes bounds of box to farthest distance triangle in x,y,z
+		if (xn < BoxMin[0]) BoxMin[0] = xn;
+		if (x > BoxMax[0]) BoxMax[0] = x;
+		if (yn < BoxMin[1]) BoxMin[1] = yn;
+		if (y > BoxMax[1]) BoxMax[1] = y;
+		if (zn < BoxMin[2]) BoxMin[2] = zn;
+		if (z > BoxMax[2]) BoxMax[2] = z;
+	}
+}
+
+void BoxTreeNode::DivideAlongX(const int count, double lengthX, std::vector<Triangle>& tri) {
+	int count1 = 0, count2 = 0;
+	//Triangle* tri1 = new Triangle[count];
+	//Triangle* tri2 = new Triangle[count];
+	std::vector<Triangle> tri1;
+	std::vector<Triangle> tri2;
+	double mid = (lengthX / 2.0) + BoxMin[0];
+	for (int i = 0; i < count; i++) {
+		glm::vec3 triCenter = (tri)[i].center;
+		if (triCenter[0] >= mid) {
+			tri2.push_back((tri)[i]);
+			count2 = count2 + 1;
+		}
+		else {
+			tri1.push_back((tri)[i]);
+			count1 = count1 + 1;
+		}
+	}
+	//if one child is empty, assign one triangle to empty child
+	if (count1 == 0) {
+		count2 = count2 - 1;
+		tri1.push_back(tri2[count2]);
+		count1 = 1;
+	}
+	else if (count2 == 0) {
+		count1 = count1 - 1;
+		tri2.push_back(tri1[count1]);
+		count2 = 1;
+	}
+	Child1 = new BoxTreeNode;
+	Child2 = new BoxTreeNode;
+	Child1->Construct(count1, tri1);
+	//delete[]tri1;
+	Child2->Construct(count2, tri2);
+	//delete[]tri2;
+}
+
+void BoxTreeNode::DivideAlongY(const int count, double lengthY, std::vector<Triangle>& tri) {
+	int count1 = 0, count2 = 0;
+	std::vector<Triangle> tri1;
+	std::vector<Triangle> tri2;
+	double mid = (lengthY / 2.0) + BoxMin[1];
+	for (int i = 0; i < count; i++) {
+		glm::vec3 triCenter = (tri)[i].center;
+		if (triCenter[1] >= mid) {
+			tri2.push_back((tri)[i]);
+			count2++;
+		}
+		else {
+			tri1.push_back((tri)[i]);
+			count1++;
+		}
+	}
+	//if one child is empty, assign one triangle to empty child
+	if (count1 == 0) {
+		count2 = count2 - 1;
+		tri1.push_back(tri2[count2]);
+		count1 = count1 + 1;
+	}
+	else if (count2 == 0) {
+		count1 = count1 - 1;
+		tri2.push_back(tri1[count1]);
+		count2 = count2 + 1;
+	}
+	Child1 = new BoxTreeNode;
+	Child2 = new BoxTreeNode;
+	Child1->Construct(count1, tri1);
+	//delete[]tri1;
+	Child2->Construct(count2, tri2);
+	//delete[]tri2;
+}
+
+void BoxTreeNode::DivideAlongZ(const int count, double lengthZ, std::vector<Triangle>& tri) {
+	int count1 = 0, count2 = 0;
+	std::vector<Triangle> tri1;
+	std::vector<Triangle> tri2;
+	double mid = (lengthZ / 2.0) + BoxMin[2];
+	for (int i = 0; i < count; i++) {
+		glm::vec3 triCenter = (tri)[i].center;
+		if (triCenter[2] >= mid) {
+			tri2.push_back((tri)[i]);
+			count2++;
+		}
+		else {
+			tri1.push_back((tri)[i]);
+			count1++;
+		}
+	}
+	//if one child is empty, assign one triangle to empty child
+	if (count1 == 0) {
+		count2 = count2 - 1;
+		tri1.push_back(tri2[count2]);
+		count1 = count1 + 1;
+	}
+	else if (count2 == 0) {
+		count1 = count1 - 1;
+		tri2.push_back(tri1[count1]);
+		count2 = count2 + 1;
+	}
+	Child1 = new BoxTreeNode;
+	Child2 = new BoxTreeNode;
+	Child1->Construct(count1, tri1);
+	//delete[]tri1;
+	Child2->Construct(count2, tri2);
+	//delete[]tri2;
+}

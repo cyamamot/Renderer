@@ -40,20 +40,6 @@ int MeshObject::returnNumTriangles() {
 	return NumTriangles;
 }
 
-//Triangle* MeshObject::returnTriangles() {
-	/*
-	for (int i = 0; i < NumTriangles; i++) {
-		for (int j = 0; j < 3; j++) {
-			std::cout << Triangles[i].GetVtx(j).Position[0] << ", " << Triangles[i].GetVtx(j).Position[1] << ", " << Triangles[i].GetVtx(j).Position[2] << std::endl;
-		}
-		std::cout << std::endl;
-	}
-	*/
-//	return Triangles;
-//}
-
-////////////////////////////////////////////////////////////////////////////////
-
 void MeshObject::MakeBox(float x,float y,float z,Material *mtl) {
 	// Allocate arrays
 	NumVertexes=24;
