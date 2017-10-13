@@ -1,0 +1,40 @@
+# Visual Studio 2015 user specific files
+.vs/
+
+# Visual Studio 2015 database file
+*.VC.db
+
+# Compiled Object files
+*.slo
+*.lo
+*.o
+*.obj
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+
+# Executables
+*.exe
+*.out
+*.app
+*.ipa
+
+#3D models
+*.ply
+
+# completed images/videos
+*.mp4
+*.bmp
+*.wlmp
