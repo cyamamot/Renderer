@@ -47,10 +47,21 @@ public:
 	int RenderPixel(int i, int j, Scene &scn);
 	void SaveBitmap(const char *filename);
 
+	//enables supersampling of pixel for antialiasing
 	void SetSuperSample(int xsamples, int ysamples);
+	//enables jittering of pixels (only if supersample is true)
 	void SetJitter(bool enable);
+	//applies jittering to pixels
+	void ApplyJitter(float& fx, float& fy);
+	//enables shirley weighting to pixels (only if supersample is true)
 	void SetShirley(bool enable);
+	//applies shirley weighting to pixels
+	void ApplyShirley(float& fx, float& fy);
+	//enables use of DOF in picture
 	void SetDepthOfField(float fp, float radius);
+	//applies DOF
+	void ApplyDOF(Ray& ray);
+	//disables pathtracing of ray (bouncing)
 	void PathTracingOff();
 }; 
 

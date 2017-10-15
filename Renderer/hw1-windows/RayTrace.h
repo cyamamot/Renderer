@@ -1,3 +1,6 @@
+/*
+Class defining Raytrace function responsible for spawning rays and using their information to create final values
+*/
 #pragma once
 #include "Scene.h"
 #include "glm/glm.hpp"

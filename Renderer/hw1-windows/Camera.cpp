@@ -35,12 +35,6 @@ void Camera::SetAspect(float asp) {
 	aspect = asp;
 }
 
-void Camera::SetDepthOfField(float fp, float radius) {
-	DOF = true;
-	focalPoint = fp;
-	aperture = radius;
-}
-
 void Camera::Render(Scene scn) {
 	FOVX = 2.0f * atan(aspect * tan(FOVY / 2.0f));
 	bmp = new Bitmap(resWidth, resHeight);
@@ -65,6 +59,64 @@ void Camera::Render(Scene scn) {
 	}));
 }
 
+int Camera::RenderPixel(int i, int j, Scene &scn) {
+	vec3 a = vec3(lookAtMatrix[0]);
+	vec3 b = vec3(lookAtMatrix[1]);
+	vec3 c = vec3(lookAtMatrix[2]);
+	vec3 d = vec3(lookAtMatrix[3]);
+	float scaleX = 2.0f * tan(FOVX / 2.0f);
+	float scaleY = 2.0f * tan(FOVY / 2.0f);
+	Ray ray;
+	ray.Origin = d;
+	ray.setTime();
+	if (supersample) {
+		Color temp;
+		temp.Set(0, 0, 0);
+		for (float x = 0; x < xSamples; x++) {
+			for (float y = 0; y < ySamples; y++) {
+				float fx = 0.5f;  
+				float fy = 0.5f;  
+				if (jitter) {
+					ApplyJitter(fx, fy);
+				}
+				if (shirley) {
+					ApplyShirley(fx, fy);
+				}
+				fx = ((i + (x / xSamples) + (fx / xSamples)) / float(resWidth)) - 0.5f;
+				fy = ((j + (y / ySamples) + (fy / ySamples)) / float(resHeight)) - 0.5f;
+				ray.Direction = glm::normalize((fx * scaleX * a) + (fy * scaleY * b) -c);
+				if (DOF) {
+					ApplyDOF(ray);
+				}
+				Intersection hit;
+				RayTrace rt(scn);
+				if (!Path) rt.turnOffPath();
+				rt.TraceRay(ray, hit, 1);
+				temp.Add(hit.Shade);
+			}
+		}
+		temp.Scale(1.0f / (xSamples * ySamples));
+		return temp.ToInt();
+	}
+	else {
+		float fx = ((float(i) + 0.5f) / float(resWidth)) - 0.5f;
+		float fy = ((float(j) + 0.5f) / float(resHeight)) - 0.5f;
+		ray.Direction = glm::normalize((fx * scaleX * a) + (fy * scaleY * b) - c);
+		if (DOF) {
+			ApplyDOF(ray);
+		}
+		Intersection hit;
+		RayTrace rt(scn);
+		if (!Path) rt.turnOffPath();
+		rt.TraceRay(ray, hit, 1);
+		return hit.Shade.ToInt();
+	}
+}
+
+void Camera::SaveBitmap(const char *filename) {
+	bmp->SaveBMP(filename);
+}
+
 void Camera::SetSuperSample(int xsamples, int ysamples) {
 	if (xsamples > 1 || ysamples > 1) {
 		xSamples = xsamples;
@@ -77,120 +129,62 @@ void Camera::SetJitter(bool enable) {
 	jitter = enable;
 }
 
+void Camera::ApplyJitter(float& fx, float& fy) {
+	//applies jittering anitialiasing to each pixel of resulting image
+	//samples taken at random location within each pixel or subpixel
+	std::random_device rand_dev;
+	std::mt19937 generator(rand_dev());
+	std::uniform_real_distribution<double> distribution(0.0, 1.0);
+	fx = distribution(generator);
+	fy = distribution(generator);
+}
+
 void Camera::SetShirley(bool enable) {
 	shirley = enable;
 }
 
-int Camera::RenderPixel(int i, int j, Scene &scn) {
-	if (supersample) {
-		Color temp;
-		temp.Set(0, 0, 0);
-		for (float x = 0; x < xSamples; x++) {
-			for (float y = 0; y < ySamples; y++) {
-				float fx = 0.5f;  
-				float fy = 0.5f;  
-				if (jitter) {
-					std::random_device rand_dev;
-					std::mt19937 generator(rand_dev());
-					std::uniform_real_distribution<double> distribution(0.0, 1.0);
-					fx = distribution(generator);
-					fy = distribution(generator);
-				}
-				if (shirley) {
-					float addx, addy;
-					if (fx < 0.5f) {
-						double temp = -0.5f + sqrt(2.0f * fx);
-						if (temp >= 0 && temp <= 1) fx = temp;
-					}
-					else if (fx >= 0.5f) {
-						double temp = 1.5f - sqrt(2.0f - (2.0f * fx));
-						if (temp >= 0 && temp <= 1) fx = temp;
-					}
-					if (fy < 0.5f) {
-						double temp = -0.5f + sqrt(2.0f * fy);
-						if (temp >= 0 && temp <= 1) fy = temp;
-					}
-					else if (fy >= 0.5f) {
-						double temp = 1.5f - sqrt(2.0f - (2.0f * fy));
-						if (temp >= 0 && temp <= 1) fy = temp;
-					}
-				}
-				fx = ((i + (x / xSamples) + (fx / xSamples)) / float(resWidth)) - 0.5f;
-				fy = ((j + (y / ySamples) + (fy / ySamples)) / float(resHeight)) - 0.5f;
-				vec3 a = vec3(lookAtMatrix[0]);
-				vec3 b = vec3(lookAtMatrix[1]);
-				vec3 c = vec3(lookAtMatrix[2]);
-				vec3 d = vec3(lookAtMatrix[3]);
-				float scaleX = 2.0f * tan(FOVX / 2.0f);
-				float scaleY = 2.0f * tan(FOVY / 2.0f);
-				Ray ray;
-				ray.Origin = d;
-				ray.Direction = glm::normalize((fx * scaleX * a) + (fy * scaleY * b) -c);
-				ray.setTime();
-				if (DOF) {
-					//sets Depth of Field for image
-					// http://www.cs.unc.edu/~jpool/COMP870/Assignment2/
-					std::random_device rand_dev;
-					std::mt19937 generator(rand_dev());
-					std::uniform_real_distribution<double> distribution(0.0f, 2.0f * PI);
-					std::uniform_real_distribution<double> distribution2(0.0f, 1.0f);
-					float angle = distribution(generator);
-					float radius = distribution2(generator);
-					glm::vec2 circPoint(cos(angle) * radius, sin(angle) * radius);
-					vec3 apertureOffset(circPoint[0] * aperture, circPoint[1] *aperture, 0.0f);
-					ray.Origin += apertureOffset;
-					ray.Direction *= focalPoint;
-					ray.Direction -= apertureOffset;
-					ray.Direction = normalize(ray.Direction);
-				}
-				Intersection hit;
-				RayTrace rt(scn);
-				if (!Path) rt.turnOffPath();
-				rt.TraceRay(ray, hit, 1);
-				temp.Add(hit.Shade);
-			}
-		}
-		temp.Scale(1.0f / (xSamples * ySamples));
-		return temp.ToInt();
+void Camera::ApplyShirley(float& fx, float& fy) {
+	//applies shirley weighting antialiasing to each subpixel
+	//depending on location of sample to center, applies appropriate weight (after jittering)
+	if (fx < 0.5f) {
+		double temp = -0.5f + sqrt(2.0f * fx);
+		if (temp >= 0 && temp <= 1) fx = temp;
 	}
-	else { /////////////////////////////////////////////////////////////////////////NEED TO CHANGE to let shirley and jitter apply to non supersampled too
-		float fx = ((float(i) + 0.5f) / float(resWidth)) - 0.5f;
-		float fy = ((float(j) + 0.5f) / float(resHeight)) - 0.5f;
-		vec3 a = vec3(lookAtMatrix[0]);
-		vec3 b = vec3(lookAtMatrix[1]);
-		vec3 c = vec3(lookAtMatrix[2]);
-		vec3 d = vec3(lookAtMatrix[3]);
-		float scaleX = 2.0f * tan(FOVX / 2.0f);
-		float scaleY = 2.0f * tan(FOVY / 2.0f);
-		Ray ray;
-		ray.Origin = d;
-		ray.Direction = glm::normalize((fx * scaleX * a) + (fy * scaleY * b) - c);
-		ray.setTime();
-		if (DOF) {
-			// http://www.cs.unc.edu/~jpool/COMP870/Assignment2/
-			std::random_device rand_dev;
-			std::mt19937 generator(rand_dev());
-			std::uniform_real_distribution<double> distribution(0.0f, 2.0f * PI);
-			std::uniform_real_distribution<double> distribution2(0.0f, 1.0f);
-			float angle = distribution(generator);
-			float radius = distribution2(generator);
-			glm::vec2 circPoint(cos(angle) * radius, sin(angle) * radius);
-			vec3 apertureOffset(circPoint[0] * aperture, circPoint[1] * aperture, 0.0f);
-			ray.Origin += apertureOffset;
-			ray.Direction *= focalPoint;
-			ray.Direction -= apertureOffset;
-			ray.Direction = normalize(ray.Direction);
-		}
-		Intersection hit;
-		RayTrace rt(scn);
-		if (!Path) rt.turnOffPath();
-		rt.TraceRay(ray, hit, 1);
-		return hit.Shade.ToInt();
+	else if (fx >= 0.5f) {
+		double temp = 1.5f - sqrt(2.0f - (2.0f * fx));
+		if (temp >= 0 && temp <= 1) fx = temp;
+	}
+	if (fy < 0.5f) {
+		double temp = -0.5f + sqrt(2.0f * fy);
+		if (temp >= 0 && temp <= 1) fy = temp;
+	}
+	else if (fy >= 0.5f) {
+		double temp = 1.5f - sqrt(2.0f - (2.0f * fy));
+		if (temp >= 0 && temp <= 1) fy = temp;
 	}
 }
 
-void Camera::SaveBitmap(const char *filename) {
-	bmp->SaveBMP(filename);
+void Camera::SetDepthOfField(float fp, float radius) {
+	DOF = true;
+	focalPoint = fp;
+	aperture = radius;
+}
+
+void Camera::ApplyDOF(Ray& ray) {
+	//applies depth of field on images to create focus blur
+	// http://www.cs.unc.edu/~jpool/COMP870/Assignment2/
+	std::random_device rand_dev;
+	std::mt19937 generator(rand_dev());
+	std::uniform_real_distribution<double> distribution(0.0f, 2.0f * PI);
+	std::uniform_real_distribution<double> distribution2(0.0f, 1.0f);
+	float angle = distribution(generator);
+	float radius = distribution2(generator);
+	glm::vec2 circPoint(cos(angle) * radius, sin(angle) * radius);
+	vec3 apertureOffset(circPoint[0] * aperture, circPoint[1] * aperture, 0.0f);
+	ray.Origin += apertureOffset;
+	ray.Direction *= focalPoint;
+	ray.Direction -= apertureOffset;
+	ray.Direction = normalize(ray.Direction);
 }
 
 void Camera::PathTracingOff() {

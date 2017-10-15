@@ -15,6 +15,7 @@ bool RayTrace::TraceRay(const Ray &ray, Intersection &hit, int depth) {
 	}
 	Ray shadow;
 	shadow.time = ray.time;
+	//determines whether the hit point is in the shadow of anything else
 	Scn->findShadow(shadow, hit);
 	Scn->findIntensity(hit, ray);
 	if (depth >= MaxDepth) {
@@ -22,12 +23,15 @@ bool RayTrace::TraceRay(const Ray &ray, Intersection &hit, int depth) {
 	}
 	Color outColor;
 	Ray newRay;
+	//spawns new ray based on initial ray and the object
 	newRay.Origin = hit.Position + (0.00025f * hit.Normal);
 	newRay.time = ray.time;
 	Intersection newHit;
 	hit.Mtl->GenerateSample(hit, ray.Direction, newRay.Direction, outColor);
+	//Traces the ray created from the reflection of the initial ray off the object
 	TraceRay(newRay, newHit, depth + 1);
 	newHit.Shade.Multiply(outColor);
+	//returns final color returned by full path raytracing including shadows
 	hit.Shade.Add(newHit.Shade);
 	return true;
 }

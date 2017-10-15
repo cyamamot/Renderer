@@ -30,12 +30,10 @@
     <ClInclude Include="MeshObject.h" />
     <ClInclude Include="MovingObject.h" />
     <ClInclude Include="Object.h" />
-    <ClInclude Include="Plane.h" />
     <ClInclude Include="PointLight.h" />
     <ClInclude Include="Ray.h" />
     <ClInclude Include="RayTrace.h" />
     <ClInclude Include="Scene.h" />
-    <ClInclude Include="Sphere.h" />
     <ClInclude Include="Triangle.h" />
     <ClInclude Include="Vertex.h" />
   </ItemGroup>
@@ -48,14 +46,18 @@
     <ClCompile Include="Color.cpp" />
     <ClCompile Include="DirectLight.cpp" />
     <ClCompile Include="InstanceObject.cpp" />
+    <ClCompile Include="Intersection.cpp" />
+    <ClCompile Include="LambertMaterial.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="MeshObject.cpp" />
+    <ClCompile Include="MetalMaterial.cpp" />
     <ClCompile Include="MovingObject.cpp" />
-    <ClCompile Include="Plane.cpp" />
     <ClCompile Include="PointLight.cpp" />
+    <ClCompile Include="Ray.cpp" />
     <ClCompile Include="RayTrace.cpp" />
-    <ClCompile Include="Sphere.cpp" />
+    <ClCompile Include="Scene.cpp" />
     <ClCompile Include="Triangle.cpp" />
+    <ClCompile Include="Vertex.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{4DE31322-A13D-4CB5-919A-D8F5C66E01B3}</ProjectGuid>

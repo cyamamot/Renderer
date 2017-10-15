@@ -16,6 +16,7 @@
 
 #3D models
 *.ply
+!dragon.ply
 
 # completed images/videos
 *.mp4

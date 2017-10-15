@@ -1,16 +1,10 @@
-////////////////////////////////////////
-// MeshObject.cpp
-////////////////////////////////////////
-
-#define _CRT_SECURE_NO_WARNINGS
-
 #include "MeshObject.h"
 #include "LambertMaterial.h"
 #include "glm/glm.hpp"
 #include "glm/ext.hpp"
 
+#define _CRT_SECURE_NO_WARNINGS
 
-////////////////////////////////////////////////////////////////////////////////
 
 MeshObject::MeshObject() {
 	NumVertexes=0;
@@ -20,14 +14,10 @@ MeshObject::MeshObject() {
 	Triangles=0;
 }
 
-////////////////////////////////////////////////////////////////////////////////
-
 MeshObject::~MeshObject() {
 	delete []Vertexes;
 	delete []Triangles;
 }
-
-////////////////////////////////////////////////////////////////////////////////
 
 bool MeshObject::Intersect(const Ray &ray, Intersection &hit) {
 	bool success=false;
@@ -135,8 +125,6 @@ void MeshObject::MakeBox(float x,float y,float z,Material *mtl) {
 	Triangles[11].index = 11;
 
 }
-
-////////////////////////////////////////////////////////////////////////////////
 
 bool MeshObject::LoadPLY(const char *filename, Material *mtl) {
 	// Open file

@@ -2,10 +2,12 @@
 
 bool MovingObject::Intersect(const Ray &ray, Intersection &hit) {
 	Ray ray2;
+	//interpoalates matrix between start and end
 	glm::mat4x4 Matrix = interpolate(initialMatrix, finalMatrix, ray.time);
 	glm::mat4x4 Inverse = inverse(Matrix);
 	ray2.Origin = glm::vec3(Inverse * glm::vec4(ray.Origin, 1));
 	ray2.Direction = glm::vec3(Inverse * glm::vec4(ray.Direction, 0));
+	//transforms ray and test for intersection
 	if (Child->Intersect(ray2, hit) == false) {
 		return false;
 	}

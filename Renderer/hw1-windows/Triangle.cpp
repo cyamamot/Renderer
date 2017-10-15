@@ -35,7 +35,8 @@ using namespace glm;
 				if (glm::length(hit.TangentU) < 0.0001)
 					hit.TangentU = glm::cross(glm::vec3(1, 0, 0), hit.Normal);
 				hit.TangentU = glm::normalize(hit.TangentU);
-				hit.TangentV = glm::cross(hit.Normal, hit.TangentU);
+				hit.TangentV = glm::cross(hit.Normal, hit.TangentU);
+
 				return true;
 			}
 		}
@@ -54,4 +55,3 @@ using namespace glm;
 		center = (Vtx[0]->Position + Vtx[1]->Position + Vtx[2]->Position) / 3.0f;
 	}
 
-/////////////////////////////////////////////////////////////////////////////

@@ -1,7 +1,7 @@
-////////////////////////////////////////
-// Triangle.h
-////////////////////////////////////////
-
+/*
+Class which defines Triangles, which comprise all MeshObject instances and are responsible for the core of intersection tests
+Made up of 3 Vertices and maintians data on Triangle characteristics
+*/
 #pragma once
 
 #include "Vertex.h"
@@ -9,7 +9,6 @@
 #include "Ray.h"
 #include "algorithm"
 
-////////////////////////////////////////////////////////////////////////////////
 
 class Triangle {
 public:
@@ -38,4 +37,3 @@ private:
 	Material *Mtl;
 };
 
-////////////////////////////////////////////////////////////////////////////////

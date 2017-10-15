@@ -1,7 +1,3 @@
-////////////////////////////////////////
-// Main.cpp
-////////////////////////////////////////
-
 #include "MeshObject.h"
 #include "InstanceObject.h"
 #include "MovingObject.h"
@@ -16,8 +12,6 @@
 #include <cstdio>
 #include <ctime>
 #include <queue>
-#include "Sphere.h"
-#include "Plane.h"
 #include "MetalMaterial.h"
 #include "AshikhminMaterial.h"
 
@@ -48,7 +42,7 @@ void project3() {
 	scn.AddObject(ground);
 	// Load dragon mesh
 	MeshObject dragon;
-	dragon.LoadPLY("dragon.ply", 0);
+	dragon.LoadPLY("../hw1-windows/dragon.ply", 0);
 	// Create box tree
 	BoxTreeObject tree;
 	tree.Construct(dragon);
@@ -160,7 +154,6 @@ void project3EC() {
 	cam.SetSuperSample(10, 10);
 	cam.SetJitter(true);
 	cam.SetShirley(true);
-	cam.SetDepthOfField(0.25, 0.01f);
 	// Render image
 	cam.Render(scn);
 	cam.SaveBitmap("project3EC1.bmp");

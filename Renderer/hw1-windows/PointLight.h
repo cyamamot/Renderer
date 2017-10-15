@@ -1,3 +1,6 @@
+/*
+Class defining Pointlight subclass of Light class
+*/
 #pragma once
 
 #include "Light.h"
@@ -11,20 +14,10 @@ public:
 	PointLight() {}
 	void SetBaseColor(Color col);
 	void SetIntensity(float intensity);
-	float Illuminate(const glm::vec3 &pos, Color &col, glm::vec3 &toLight, glm::vec3 &ltPos) {
-		toLight = Position - pos;
-		toLight = glm::normalize(toLight);
-		float bright = Intensity / (length(toLight) * length(toLight)); 
-		col = BaseColor;
-		ltPos = Position;
-		return bright;
-	}
-	void SetPosition(vec3 pos) {
-		Position = pos;
-	}
-	vec3 getDirection(const glm::vec3& start) {
-		return normalize(Position - start);
-	}
+	//returns distance to light, the color of the light, and the light position
+	float Illuminate(const glm::vec3 &pos, Color &col, glm::vec3 &toLight, glm::vec3 &ltPos);
+	void SetPosition(vec3 pos);
+	vec3 getDirection(const glm::vec3& start);
 
 private:
 	vec3 Position;
